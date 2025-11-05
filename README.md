@@ -36,7 +36,7 @@ Using nutrient composition data, it identifies similar food items and delivers p
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone [https://github.com/VarunHarinath/nutrition-recommendation-system.git](https://github.com/VarunHarinath/Intelligent-Nutrition-Recommendation-System)
+git clone https://github.com/VarunHarinath/Intelligent-Nutrition-Recommendation-System
 cd intelligent-nutrition-recommendation-system
 ```
 
