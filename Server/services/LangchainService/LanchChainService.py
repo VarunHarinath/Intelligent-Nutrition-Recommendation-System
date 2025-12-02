@@ -24,8 +24,10 @@ class Langchain_Service:
         try:
             return json.loads(cleaned)
         except json.JSONDecodeError:
-            return {"raw_output": cleaned}
-    def prompt_invoke(self,query,prompt):
+            return {"data": cleaned}
+        
+        
+    def _prompt_invoke_step_one(self,query,prompt=STEP_1_PROMPT):
         prompt = ChatPromptTemplate.from_messages([
             ("system",prompt),
             ("human","{user_message}")
@@ -33,16 +35,27 @@ class Langchain_Service:
         chain = prompt | self.llm
         output = chain.invoke({"user_message":query})
         return self.parse_llm_json(output)
-    def invoke_agent(self,query:RequestBaseModel,mode):
+    
+    def _prompt_invoke_step_two(self,query,scored_food_list,prompt=STEP_2_PROMPT):
+        prompt = ChatPromptTemplate.from_messages([
+            ("system",prompt)
+        ])
+        chain = prompt | self.llm
+        output = chain.invoke({"scored_food_list":scored_food_list,"user_query":query})
+        return self.parse_llm_json(output)
+    
+    def step_one(self,query):
         try:
-            if mode == 'step_1':
-                return self.prompt_invoke(query=query.data,prompt=STEP_1_PROMPT)
-            elif mode == 'step_2':
-                return self.prompt_invoke(query=query.data,prompt=STEP_2_PROMPT)
-            else:
-                return ErrorBaseModel(success=False,error="TypeError: Mode not specified properly. It's either 'step_1' or 'step_2' ")
+            return self._prompt_invoke_step_one(query=query.data)
         except Exception as e:
             return ErrorBaseModel(success=False,error=str(e))
+    
+    def step_two(self,user_prompt,scored_food_list):
+        try:
+            return self._prompt_invoke_step_two(query=user_prompt,scored_food_list=scored_food_list)
+        except Exception as e:
+            return ErrorBaseModel(success=False,error=str(e))
+        
 
         
     
