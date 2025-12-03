@@ -50,4 +50,4 @@ jobs:
                     docker rm service_dev || true
                     # Run new container
                     docker run -d --name service_dev -p 8000:8000 $IMAGE_URI
-                    EOF
+                    EOF. 
