@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import Header from "@/components/header"
 import axios from "axios"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 interface Message {
   id: string
@@ -69,10 +71,9 @@ export default function AIChatPage() {
       const response = await axios.post("http://localhost:8000/api/v1/data", {
         data: input,
       })
-
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: response.data.content || "I received your message but couldn't generate a response. Please try again.",
+        content: response.data.data || "I received your message but couldn't generate a response. Please try again.",
         sender: "ai",
         timestamp: response.data.timestamp || new Date().toISOString(),
       }
@@ -135,7 +136,18 @@ export default function AIChatPage() {
                       : "bg-muted text-foreground rounded-bl-none"
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+
+                  {/* 👇 Only AI messages get markdown formatting */}
+                  {message.sender === "ai" ? (
+                    <div className="text-sm whitespace-pre-wrap prose prose-sm dark:prose-invert">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-sm">{message.content}</p>
+                  )}
+
                   <p className="text-xs mt-1 opacity-70">
                     {new Date(message.timestamp).toLocaleTimeString()}
                   </p>
