@@ -40,11 +40,9 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/inrt/server:latest
-          ssh -tt -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_IP }} << 'EOF'
-          sudo apt update && sudo apt install -y docker.io awscli
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-          docker pull $IMAGE_URI
-          docker stop server || true
-          docker rm server || true
-          docker run -d --name server -p 8000:8000 $IMAGE_URI
-          EOF
+          ssh -tt -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_IP }} "\
+          sudo apt update && sudo apt install -y docker.io awscli && \
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com && \
+          docker pull $IMAGE_URI && \
+          docker stop server || true && docker rm server || true && \
+          docker run -d --name server -p 8000:8000 $IMAGE_URI"
