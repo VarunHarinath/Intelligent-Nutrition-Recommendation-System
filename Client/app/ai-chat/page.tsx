@@ -63,8 +63,15 @@ export default function AIPage() {
 
     try {
       const endpoint = activeTab === "chat" ? "/chat" : "/data"
-      const response = await axios.post(`http://13.59.170.88:8000/api/v1${endpoint}`, { data: input })
-
+     const response = await axios.post(
+  `https://penurious-clarissa-ungodly.ngrok-free.dev/api/v1${endpoint}`,
+  { data: input },
+  {
+    headers: {
+      "ngrok-skip-browser-warning": "true"
+    }
+  }
+);
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: response.data.data || response.data || "No response received.",
