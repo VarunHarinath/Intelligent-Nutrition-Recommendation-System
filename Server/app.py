@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from routes.DataInputRoute import DataInputRoute
 from fastapi.middleware.cors import CORSMiddleware
+from routes.AiChatRoute import AiChatRoute
 
 app = FastAPI(title="Intelligent-Nutrition-Recommendation-System")
 
@@ -18,3 +19,4 @@ def home():
     return "Hello world"
 
 app.include_router(DataInputRoute)
+app.include_router(AiChatRoute)

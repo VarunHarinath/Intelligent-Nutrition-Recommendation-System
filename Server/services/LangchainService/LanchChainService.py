@@ -9,10 +9,14 @@ import os
 import re
 import json
 load_dotenv()
+
+MAX_HISTORY = 20 
+
 class Langchain_Service:
     def __init__(self):
         self.tools = [AdditionTool]
-        self.llm = GoogleGenerativeAI(model = os.getenv('GOOGLE_AI_MODEL'))        
+        self.llm = GoogleGenerativeAI(model = os.getenv('GOOGLE_AI_MODEL'))    
+        self.memory = {"chat_history": []}   
     @staticmethod    
     def parse_llm_json(raw_text: str):
         if not raw_text:
@@ -56,7 +60,23 @@ class Langchain_Service:
         except Exception as e:
             return ErrorBaseModel(success=False,error=str(e))
         
+    def invoke_agent(self, query: str):
+        try:
+            self.memory["chat_history"].append({"user": query})
+            
+            # Keep only the last MAX_HISTORY items
+            if len(self.memory["chat_history"]) > MAX_HISTORY:
+                self.memory["chat_history"] = self.memory["chat_history"][-MAX_HISTORY:]
 
+            response = self.llm.invoke(query)
+            self.memory["chat_history"].append({"ai": response})
+
+            if len(self.memory["chat_history"]) > MAX_HISTORY:
+                self.memory["chat_history"] = self.memory["chat_history"][-MAX_HISTORY:]
+
+            return response
+        except Exception as e:
+            return {"success": False, "error": str(e)}
         
     
     

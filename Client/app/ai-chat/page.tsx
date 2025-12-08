@@ -10,7 +10,7 @@ import remarkGfm from "remark-gfm"
 
 interface Message {
   id: string
-  content: string
+  content: string | object
   sender: "user" | "ai"
   timestamp: string
 }
@@ -67,7 +67,7 @@ export default function AIPage() {
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: response.data.data || "No response received.",
+        content: response.data.data || response.data || "No response received.",
         sender: "ai",
         timestamp: response.data.timestamp || new Date().toISOString(),
       }
@@ -146,36 +146,50 @@ export default function AIPage() {
           </p>
         </div>
 
-        {/* Messages Container */}
-        <Card className="flex-1 flex flex-col h-[500px] p-6 mb-6 bg-card border border-primary/10">
+        {/* Messages / Meal Output */}
+        <Card className="flex-1 flex flex-col max-h-[70vh] p-6 mb-6 bg-card border border-primary/10">
           <div className="flex-1 overflow-y-auto space-y-4">
-            {activeMessages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                    message.sender === "user"
-                      ? "bg-primary text-primary-foreground rounded-br-none"
-                      : "bg-muted text-foreground rounded-bl-none"
-                  }`}
-                >
-                  {message.sender === "ai" ? (
-                    <div className="text-sm whitespace-pre-wrap">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {message.content}
-                      </ReactMarkdown>
+            {activeTab === "chat"
+              ? activeMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
+                        message.sender === "user"
+                          ? "bg-primary text-primary-foreground rounded-br-none"
+                          : "bg-muted text-foreground rounded-bl-none"
+                      }`}
+                    >
+                      {message.sender === "ai" ? (
+                        <div className="text-sm whitespace-pre-wrap">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {typeof message.content === "string"
+                              ? message.content
+                              : JSON.stringify(message.content, null, 2)}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p className="text-sm">{message.content}</p>
+                      )}
+                      <p className="text-xs mt-1 opacity-70">
+                        {new Date(message.timestamp).toLocaleTimeString()}
+                      </p>
                     </div>
-                  ) : (
-                    <p className="text-sm">{message.content}</p>
-                  )}
-                  <p className="text-xs mt-1 opacity-70">
-                    {new Date(message.timestamp).toLocaleTimeString()}
-                  </p>
-                </div>
-              </div>
-            ))}
+                  </div>
+                ))
+              : activeMessages.length > 0
+              ? activeMessages.map((meal) => (
+                  <div key={meal.id} className="text-sm whitespace-pre-wrap">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {typeof meal.content === "string"
+                        ? meal.content
+                        : JSON.stringify(meal.content, null, 2)}
+                    </ReactMarkdown>
+                  </div>
+                ))
+              : "🍽️ Your generated meal plan will appear here."}
 
             {isLoading && (
               <div className="flex justify-start">
